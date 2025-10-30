@@ -1,0 +1,8 @@
+packages:
+  url-shortener/internal/http-server/handlers/url/save:
+    interfaces:
+      URLSaver:
+        config:
+          dir: "{{.InterfaceDir}}/mocks"
+          filename: "mock_url_saver.go"
+          structname: "MockURLSaver"

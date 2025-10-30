@@ -1,0 +1,7 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS urls (
+    id SERIAL PRIMARY KEY,
+    alias TEXT NOT NULL UNIQUE,
+    url TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
