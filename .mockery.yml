@@ -5,4 +5,13 @@ packages:
         config:
           dir: "{{.InterfaceDir}}/mocks"
           filename: "mock_url_saver.go"
+          pkgname: "mocks"
           structname: "MockURLSaver"
+  url-shortener/internal/http-server/handlers/redirect:
+    interfaces:
+      URLGetter:
+        config:
+          dir: "{{.InterfaceDir}}/mocks"
+          filename: "mock_url_getter.go"
+          pkgname: "mocks"
+          structname: "MockURLGetter"
