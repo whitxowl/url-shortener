@@ -15,3 +15,11 @@ packages:
           filename: "mock_url_getter.go"
           pkgname: "mocks"
           structname: "MockURLGetter"
+  url-shortener/internal/http-server/handlers/url/delete:
+    interfaces:
+      URLDeleter:
+        config:
+          dir: "{{.InterfaceDir}}/mocks"
+          filename: "mock_url_deleter.go"
+          pkgname: "mocks"
+          structname: "MockURLDeleter"

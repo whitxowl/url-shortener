@@ -6,6 +6,7 @@ import (
 	"os"
 	"url-shortener/internal/config"
 	"url-shortener/internal/http-server/handlers/redirect"
+	"url-shortener/internal/http-server/handlers/url/delete"
 	"url-shortener/internal/http-server/handlers/url/save"
 	"url-shortener/internal/migration"
 	"url-shortener/internal/storage/postgres"
@@ -53,6 +54,7 @@ func main() {
 
 	router.Post("/url", save.New(log, store))
 	router.Get("/{alias}", redirect.New(log, store))
+	router.Delete("/{alias}", delete.New(log, store))
 
 	log.Info("starting server", slog.String("address", cfg.Address))
 
