@@ -1,10 +1,12 @@
 package save
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/lib/api/response"
 	"url-shortener/internal/lib/random"
+	"url-shortener/internal/storage"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -66,8 +68,13 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		}
 
 		err = urlSaver.SaveURL(req.URL, alias)
+		if errors.Is(err, storage.ErrURLAlreadyExists) {
+			log.Info("url already exists", slog.String("url", req.URL))
 
-		// TODO: add custom errors (url already exists, alias already exists ...)
+			render.JSON(w, r, response.Error("url already exists"))
+
+			return
+		}
 		if err != nil {
 			log.Error("failed to decode request", "error", err)
 

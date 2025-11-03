@@ -3,9 +3,12 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
+	"url-shortener/internal/storage"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -46,6 +49,10 @@ func (s *Storage) SaveURL(urlToSave string, alias string) error {
 	_, err := s.Db.ExecContext(ctx, query, urlToSave, alias)
 
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return storage.ErrURLAlreadyExists
+		}
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -65,6 +72,9 @@ func (s *Storage) GetURL(alias string) (string, error) {
 	err := s.Db.QueryRowContext(ctx, query, alias).Scan(&url)
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", storage.ErrURLNotFound
+		}
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -79,10 +89,16 @@ func (s *Storage) DeleteURL(alias string) error {
 
 	query := `DELETE FROM urls WHERE alias = $1`
 
-	_, err := s.Db.ExecContext(ctx, query, alias)
+	result, err := s.Db.ExecContext(ctx, query, alias)
 
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	rows, err := result.RowsAffected()
+
+	if rows == 0 {
+		return &storage.ErrNoUrlWithAlias{Alias: alias}
 	}
 
 	return nil

@@ -1,9 +1,11 @@
 package delete
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/lib/api/response"
+	"url-shortener/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -34,6 +36,13 @@ func New(log *slog.Logger, deleter URLDeleter) http.HandlerFunc {
 		}
 
 		err := deleter.DeleteURL(alias)
+		if errors.Is(err, &storage.ErrNoUrlWithAlias{}) {
+			log.Info("no url with alias", slog.String("alias", alias))
+
+			render.JSON(w, r, response.Error("no url with such alias"))
+
+			return
+		}
 		if err != nil {
 			log.Error("failed to delete url", "error", err)
 

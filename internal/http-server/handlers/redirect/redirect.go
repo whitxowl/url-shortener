@@ -1,9 +1,11 @@
 package redirect
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/lib/api/response"
+	"url-shortener/internal/storage"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -33,6 +35,13 @@ func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 		}
 
 		resURL, err := urlGetter.GetURL(alias)
+		if errors.Is(err, storage.ErrURLNotFound) {
+			log.Info("url not found", slog.String("alias", alias))
+
+			render.JSON(w, r, response.Error("not found"))
+
+			return
+		}
 		if err != nil {
 			log.Error("failed to get url", "error", err)
 
