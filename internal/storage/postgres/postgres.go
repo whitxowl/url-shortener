@@ -87,13 +87,3 @@ func (s *Storage) DeleteURL(alias string) error {
 
 	return nil
 }
-
-func (s *Storage) checkExists(ctx context.Context, url, alias string) (urlExists bool, aliasExists bool, err error) {
-	query := `
-        SELECT 
-            EXISTS(SELECT 1 FROM urls WHERE url = $1),
-            EXISTS(SELECT 1 FROM urls WHERE alias = $2)
-    `
-	err = s.Db.QueryRowContext(ctx, query, url, alias).Scan(&urlExists, &aliasExists)
-	return urlExists, aliasExists, err
-}
